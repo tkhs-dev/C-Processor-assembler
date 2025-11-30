@@ -2,15 +2,17 @@ package dev.tkhs
 
 import dev.tkhs.AsmInstruction.*
 import kotlin.reflect.KClass
+import kotlin.reflect.full.primaryConstructor
+import kotlin.reflect.jvm.jvmErasure
 
 sealed class AsmInstruction {
-    data object Nop: AsmInstruction()
+    class Nop: AsmInstruction()
 
     enum class Reg {A, B}
 
     data class LoadI(val reg: Reg, val value: Int): AsmInstruction()
     data class LoadD(val reg: Reg, val addr: Int): AsmInstruction()
-    data object StoreD: AsmInstruction()
+    data class StoreD(val reg: Reg): AsmInstruction()
     data class StoreI(val value:Int): AsmInstruction()
 
     sealed class Op(val dest: Reg): AsmInstruction() {
@@ -23,7 +25,7 @@ sealed class AsmInstruction {
         class Or(dest: Reg): Op(dest)
     }
 
-    object Cmp: AsmInstruction()
+    class Cmp: AsmInstruction()
 
     data class Jmp(val address: String): AsmInstruction()
     data class Jpc(val address: String): AsmInstruction()
@@ -74,7 +76,46 @@ class AsmParser {
             } else null
 
             val instrToken = tokens.removeFirstOrNull() ?: return null
-            val instrClass = instructions[instrToken.uppercase()] ?: return null
+            val instrClass = instructions[instrToken.uppercase()] ?: throw AssertionError("Unknown label '$instrToken'")
+
+            val params = mutableListOf<Any>()
+            for (param in instrClass.primaryConstructor?.parameters.orEmpty()) {
+                if(!tokens.isEmpty()){
+                    val token = tokens.removeFirst()
+                    when (param.type.jvmErasure) {
+                        AsmInstruction.Reg::class -> {
+                            params.add(parseReg(token))
+                        }
+                        Int::class -> {
+                            params.add(parseInt(token))
+                        }
+                        String::class -> {
+                            params.add(token)
+                        }
+                        else -> throw AssertionError("Unsupported parameter type '${param.type}'")
+                    }
+                } else {
+                    throw AssertionError("Insufficient parameters for instruction '$instrToken'")
+                }
+            }
+            val instr =  instrClass.primaryConstructor?.call(*params.toTypedArray()) ?: instrClass.objectInstance
+            return if (label != null) {
+                instr!!.withLabel(label)
+            } else {
+                instr!!
+            }
+        }
+
+        private fun parseReg(token: String): AsmInstruction.Reg {
+            return when (token.uppercase()) {
+                "A" -> AsmInstruction.Reg.A
+                "B" -> AsmInstruction.Reg.B
+                else -> throw AssertionError("Unknown register '$token'")
+            }
+        }
+
+        private fun parseInt(token: String): Int {
+            return token.toIntOrNull() ?: throw AssertionError("Invalid integer value '$token'")
         }
     }
 }
