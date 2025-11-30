@@ -32,7 +32,6 @@ class Asm2Machine {
                 pc += instr.getSize()
             }
 
-            println(labelMap)
             instrs.forEach { instr ->
                 if (instr is MachineInstruction.TwoWord && instr.value is Address.Label) {
                     val label = (instr.value as Address.Label).name
