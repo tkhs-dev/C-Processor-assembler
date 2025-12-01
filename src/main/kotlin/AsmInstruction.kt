@@ -11,7 +11,7 @@ sealed class AsmInstruction {
     enum class Reg {A, B}
 
     data class LoadI(val reg: Reg, val value: Int): AsmInstruction()
-    data class LoadD(val reg: Reg, val addr: Int): AsmInstruction()
+    data class LoadD(val reg: Reg): AsmInstruction()
     data class StoreD(val reg: Reg): AsmInstruction()
     data class StoreI(val value:Int): AsmInstruction()
 
