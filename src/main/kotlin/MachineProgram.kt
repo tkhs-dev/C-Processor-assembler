@@ -9,7 +9,7 @@ class MachineProgram(private val instructions: List<MachineInstruction>) {
 
     private fun calculateAddresses() {
         var mainPc = 0
-        var dataPc = instructions.sumOf { it.getSize() }
+        var dataPc = 0x8000
         val addressMap = mutableMapOf<Int, MachineInstruction>()
         instructions.forEach { instr ->
             val pc = when (instr) {
