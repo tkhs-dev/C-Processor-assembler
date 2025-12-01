@@ -90,7 +90,12 @@ class AsmParser {
                             params.add(parseReg(token))
                         }
                         Int::class -> {
-                            params.add(parseInt(token))
+                            val intValue = if (token.startsWith("0x")) {
+                                token.substring(2).toIntOrNull(16)
+                            } else {
+                                token.toIntOrNull()
+                            } ?: throw AssertionError("Invalid integer value '$token'")
+                            params.add(intValue)
                         }
                         String::class -> {
                             params.add(token)
