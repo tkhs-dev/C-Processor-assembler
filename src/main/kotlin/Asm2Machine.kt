@@ -2,41 +2,27 @@ package dev.tkhs
 
 class Asm2Machine {
     companion object {
-        fun convert(instr: List<AsmInstruction>): List<MachineInstruction>{
-            val instrs = instr.flatMap { map(it) }
-            resolveLabels(instrs)
-            check(instrs)
-            return instrs
+        fun convert(instr: List<AsmInstruction>): MachineProgram{
+            val machineInstrs = instr.flatMap { map(it) }
+            val program = MachineProgram(machineInstrs)
+            check(program)
+            return program
         }
 
-        private fun check(instrs: List<MachineInstruction>) {
-            instrs.forEach { instr ->
+        private fun check(program: MachineProgram) {
+            program.program.forEach { (addr, instr) ->
+                if (instr !is MachineInstruction.DATA) {
+                    val nextAddr = addr + instr.getSize()
+                    program.program[nextAddr]?.let { nextInstr ->
+                        if (nextInstr is MachineInstruction.DATA) {
+                            throw AssembleError("Instruction at address $addr overlaps with data at address $nextAddr")
+                        }
+                    }
+                }
+                // check unresolved labels
                 if (instr is MachineInstruction.TwoWord && instr.value is Address.Label) {
                     val label = (instr.value as Address.Label).name
                     throw AssembleError("Unresolved label: $label")
-                }
-            }
-        }
-
-        private fun resolveLabels(instrs: List<MachineInstruction>) {
-            val labelMap = mutableMapOf<String, Int>()
-            var pc = 0
-            instrs.forEach { instr ->
-                instr.label?.let { label ->
-                    if (labelMap.containsKey(label)) {
-                        throw AssembleError("Duplicate label: $label")
-                    }
-                    labelMap[label] = pc
-                }
-                pc += instr.getSize()
-            }
-
-            instrs.forEach { instr ->
-                if (instr is MachineInstruction.TwoWord && instr.value is Address.Label) {
-                    val label = (instr.value as Address.Label).name
-                    val addr = labelMap[label]
-                        ?: throw AssembleError("Undefined label: $label")
-                    instr.value = Address.Addr(addr.toShort())
                 }
             }
         }
@@ -107,6 +93,11 @@ class Asm2Machine {
                     MachineInstruction.SETIXL((instr.value and 0xFF).toByte()),
                     MachineInstruction.SETIXH(((instr.value shr 8) and 0xFF).toByte())
                 )
+                is AsmInstruction.DC -> {
+                    listOf(
+                        MachineInstruction.DATA(instr.value.toByte()),
+                    )
+                }
             }.let { mapped ->
                 instr.label?.let { label ->
                     mapped.first().label = label

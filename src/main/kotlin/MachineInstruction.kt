@@ -61,6 +61,7 @@ sealed class MachineInstruction(val opcode: Int) {
     class DECB : ZeroWord(0x9a)
     class CMP : ZeroWord(0xA1)
     class NOP : ZeroWord(0x00)
+    class DATA(value: Byte) : ZeroWord(value.toInt())
 
     class SETIXH(value: Byte) : OneWord(0xD0, value)
     class SETIXL(value: Byte) : OneWord(0xD1, value)

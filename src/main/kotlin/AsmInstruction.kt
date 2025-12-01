@@ -35,6 +35,8 @@ sealed class AsmInstruction {
     data class SetIxH(val value: Int): AsmInstruction()
     data class SetIx(val value: Int): AsmInstruction()
 
+    data class DC(val value: Int): AsmInstruction()
+
     var label: String? = null
 
     fun withLabel(label: String): AsmInstruction {
@@ -65,6 +67,7 @@ class AsmParser {
             "SETIXL" to SetIxL::class,
             "SETIXH" to SetIxH::class,
             "SETIX" to SetIx::class,
+            "DC" to DC::class
         )
 
         fun parse(line: String): AsmInstruction? {

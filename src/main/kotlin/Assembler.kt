@@ -5,8 +5,6 @@ class Assembler {
         return asmCode.lines()
             .mapNotNull { AsmParser.parse(it) }
             .let { Asm2Machine.convert(it) }
-            .map { it.toBytes() }
-            .flatten()
             .toByteArray()
     }
 }
