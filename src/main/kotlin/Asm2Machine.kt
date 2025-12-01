@@ -22,7 +22,6 @@ class Asm2Machine {
             val labelMap = mutableMapOf<String, Int>()
             var pc = 0
             instrs.forEach { instr ->
-                println("$pc: $instr, ${instr.label}")
                 instr.label?.let { label ->
                     if (labelMap.containsKey(label)) {
                         throw AssembleError("Duplicate label: $label")

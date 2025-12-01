@@ -23,8 +23,9 @@ class CPAssembler : CliktCommand() {
             writer.write(machineCode)
         } catch (e: AssembleError){
             println("Assembly Error: ${e.message}")
+            return
         }
-
+        println("Assembled successfully to $output")
     }
 
 }
