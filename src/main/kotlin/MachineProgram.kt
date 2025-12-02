@@ -64,4 +64,15 @@ class MachineProgram(private val instructions: List<MachineInstruction>) {
         }
         return byteArray
     }
+
+    fun toMemoryMap(): Map<Int, Byte> {
+        val memoryMap = mutableMapOf<Int, Byte>()
+        program.forEach { (addr, instr) ->
+            val bytes = instr.toBytes()
+            bytes.forEachIndexed { index, byte ->
+                memoryMap[addr + index] = byte
+            }
+        }
+        return memoryMap
+    }
 }

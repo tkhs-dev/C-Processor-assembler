@@ -1,18 +1,15 @@
 package dev.tkhs
 
 interface Writer {
-    fun write(data: ByteArray)
+    fun write(data: MachineProgram)
 }
 
 class MemoryImageWriter(val path: String) : Writer {
-    override fun write(data: ByteArray) {
-        data.mapIndexed { i, byte ->
-            if (byte != 0.toByte()) {
-                String.format("%04X %02X", i, byte.toUByte().toInt())
-            } else {
-                null
+    override fun write(data: MachineProgram) {
+        data.toMemoryMap().let { memoryMap ->
+            val lines = memoryMap.entries.sortedBy { it.key }.map { (addr, byte) ->
+                String.format("%04X    %02X", addr, byte)
             }
-        }.filterNotNull().let { lines ->
             java.io.File(path).writeText(lines.joinToString("\n"))
         }
     }
