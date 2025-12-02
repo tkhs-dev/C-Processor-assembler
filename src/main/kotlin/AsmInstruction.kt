@@ -10,6 +10,11 @@ sealed class AsmInstruction {
 
     enum class Reg {A, B}
 
+    sealed class Address {
+        data class Addr(val addr: UShort): Address()
+        data class Label(val name: String): Address()
+    }
+
     data class LoadI(val reg: Reg, val value: Int): AsmInstruction()
     data class LoadD(val reg: Reg): AsmInstruction()
     data class StoreD(val reg: Reg): AsmInstruction()
@@ -27,15 +32,16 @@ sealed class AsmInstruction {
 
     class Cmp: AsmInstruction()
 
-    data class Jmp(val address: String): AsmInstruction()
-    data class Jpc(val address: String): AsmInstruction()
-    data class Jpn(val address: String): AsmInstruction()
+    data class Jmp(val address: Address): AsmInstruction()
+    data class Jpc(val address: Address): AsmInstruction()
+    data class Jpn(val address: Address): AsmInstruction()
 
     data class SetIxL(val value: Int): AsmInstruction()
     data class SetIxH(val value: Int): AsmInstruction()
-    data class SetIx(val value: Int): AsmInstruction()
+    data class SetIx(val address: Address): AsmInstruction()
 
     data class DC(val value: Int): AsmInstruction()
+    data class DS(val size: Int): AsmInstruction()
 
     var label: String? = null
 
@@ -67,7 +73,8 @@ class AsmParser {
             "SETIXL" to SetIxL::class,
             "SETIXH" to SetIxH::class,
             "SETIX" to SetIx::class,
-            "DC" to DC::class
+            "DC" to DC::class,
+            "DS" to DS::class
         )
 
         fun parse(line: String): AsmInstruction? {
@@ -88,6 +95,16 @@ class AsmParser {
                     when (param.type.jvmErasure) {
                         AsmInstruction.Reg::class -> {
                             params.add(parseReg(token))
+                        }
+                        AsmInstruction.Address::class -> {
+                            val address = if (token.matches(Regex("^[0-9]+$"))) {
+                                AsmInstruction.Address.Addr(token.toUShort())
+                            } else if (token.matches(Regex("^0x[0-9a-fA-F]+$"))) {
+                                AsmInstruction.Address.Addr(token.substring(2).toUShort(16))
+                            } else {
+                                AsmInstruction.Address.Label(token)
+                            }
+                            params.add(address)
                         }
                         Int::class -> {
                             val intValue = if (token.startsWith("0x")) {

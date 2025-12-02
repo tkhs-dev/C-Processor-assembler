@@ -22,6 +22,24 @@ sealed class MachineInstruction(val opcode: Int) {
         }
     }
 
+    sealed class AddressOneWord(opCode: Int, var value: Address) : MachineInstruction(opCode) {
+        override fun toBytes(): List<Byte> {
+            if (value is Address.Addr) {
+                val addr = (value as Address.Addr).addr.toInt()
+                return listOf(
+                    opcode.toByte(),
+                    (addr and 0xFF).toByte()
+                )
+            } else {
+                throw IllegalStateException("Address.Label cannot be converted to bytes directly")
+            }
+        }
+
+        override fun getSize(): Int {
+            return 2
+        }
+    }
+
     sealed class TwoWord(opCode: Int, var value: Address) : MachineInstruction(opCode) {
         override fun toBytes(): List<Byte> {
             if (value is Address.Addr) {
@@ -38,6 +56,16 @@ sealed class MachineInstruction(val opcode: Int) {
 
         override fun getSize(): Int {
             return 3
+        }
+    }
+
+    class Data(val words: Int, val data: ByteArray) : MachineInstruction(0) {
+        override fun toBytes(): List<Byte> {
+            return data.toList()
+        }
+
+        override fun getSize(): Int {
+            return words
         }
     }
 
@@ -61,10 +89,9 @@ sealed class MachineInstruction(val opcode: Int) {
     class DECB : ZeroWord(0x9a)
     class CMP : ZeroWord(0xA1)
     class NOP : ZeroWord(0x00)
-    class DATA(value: Byte) : ZeroWord(value.toInt())
 
-    class SETIXH(value: Byte) : OneWord(0xD0, value)
-    class SETIXL(value: Byte) : OneWord(0xD1, value)
+    class SETIXH(value: Address) : AddressOneWord(0xD0, value)
+    class SETIXL(value: Address) : AddressOneWord(0xD1, value)
     class LDIA(value: Byte) : OneWord(0xD8, value)
     class LDIB(value: Byte) : OneWord(0xD9, value)
     class STDI(value: Byte) : OneWord(0xF8, value)
@@ -84,5 +111,7 @@ sealed class MachineInstruction(val opcode: Int) {
 
 sealed class Address{
     data class Label(val name: String): Address()
-    data class Addr(val addr: Short): Address()
+    data class Addr(val addr: UShort): Address()
+    data class LabelLow(val name: String): Address()
+    data class LabelHigh(val name: String): Address()
 }

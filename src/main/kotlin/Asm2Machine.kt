@@ -11,10 +11,10 @@ class Asm2Machine {
 
         private fun check(program: MachineProgram) {
             program.program.forEach { (addr, instr) ->
-                if (instr !is MachineInstruction.DATA) {
+                if (instr !is MachineInstruction.Data) {
                     val nextAddr = addr + instr.getSize()
                     program.program[nextAddr]?.let { nextInstr ->
-                        if (nextInstr is MachineInstruction.DATA) {
+                        if (nextInstr is MachineInstruction.Data) {
                             throw AssembleError("Instruction at address $addr overlaps with data at address $nextAddr")
                         }
                     }
@@ -84,18 +84,23 @@ class Asm2Machine {
                 }
 
                 is AsmInstruction.Cmp -> listOf(MachineInstruction.CMP())
-                is AsmInstruction.Jmp -> listOf(MachineInstruction.JP(Address.Label(instr.address)))
-                is AsmInstruction.Jpc -> listOf(MachineInstruction.JPC(Address.Label(instr.address)))
-                is AsmInstruction.Jpn -> listOf(MachineInstruction.JPN(Address.Label(instr.address)))
-                is AsmInstruction.SetIxL -> listOf(MachineInstruction.SETIXL(instr.value.toByte()))
-                is AsmInstruction.SetIxH -> listOf(MachineInstruction.SETIXH(instr.value.toByte()))
+                is AsmInstruction.Jmp -> listOf(MachineInstruction.JP(convAddress(instr.address)))
+                is AsmInstruction.Jpc -> listOf(MachineInstruction.JPC(convAddress(instr.address)))
+                is AsmInstruction.Jpn -> listOf(MachineInstruction.JPN(convAddress(instr.address)))
+                is AsmInstruction.SetIxL -> listOf(MachineInstruction.SETIXL(Address.Addr(instr.value.toUShort())))
+                is AsmInstruction.SetIxH -> listOf(MachineInstruction.SETIXH(Address.Addr(instr.value.toUShort())))
                 is AsmInstruction.SetIx -> listOf(
-                    MachineInstruction.SETIXL((instr.value and 0xFF).toByte()),
-                    MachineInstruction.SETIXH(((instr.value shr 8) and 0xFF).toByte())
+                    MachineInstruction.SETIXL(convAddressLow(instr.address)),
+                    MachineInstruction.SETIXH(convAddressHigh(instr.address))
                 )
                 is AsmInstruction.DC -> {
                     listOf(
-                        MachineInstruction.DATA(instr.value.toByte()),
+                        MachineInstruction.Data(1, byteArrayOf(instr.value.toByte()))
+                    )
+                }
+                is AsmInstruction.DS -> {
+                    listOf(
+                        MachineInstruction.Data(instr.size, ByteArray(instr.size))
                     )
                 }
             }.let { mapped ->
@@ -105,5 +110,26 @@ class Asm2Machine {
                 mapped
             }
         }
+    }
+}
+
+private fun convAddress(addr: AsmInstruction.Address): Address {
+    return when (addr) {
+        is AsmInstruction.Address.Label -> Address.Label(addr.name)
+        is AsmInstruction.Address.Addr -> Address.Addr(addr.addr)
+    }
+}
+
+private fun convAddressLow(addr: AsmInstruction.Address): Address {
+    return when (addr) {
+        is AsmInstruction.Address.Label -> Address.LabelLow(addr.name)
+        is AsmInstruction.Address.Addr -> Address.Addr((addr.addr.toInt() and 0xFF).toUShort())
+    }
+}
+
+private fun convAddressHigh(addr: AsmInstruction.Address): Address {
+    return when (addr) {
+        is AsmInstruction.Address.Label -> Address.LabelHigh(addr.name)
+        is AsmInstruction.Address.Addr -> Address.Addr(((addr.addr.toInt() shr 8) and 0xFF).toUShort())
     }
 }
