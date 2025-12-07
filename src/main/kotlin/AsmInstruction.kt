@@ -35,6 +35,7 @@ sealed class AsmInstruction {
     data class Jmp(val address: Address): AsmInstruction()
     data class Jpc(val address: Address): AsmInstruction()
     data class Jpz(val address: Address): AsmInstruction()
+    data class Jps(val address: Address): AsmInstruction()
 
     data class SetIxL(val value: Int): AsmInstruction()
     data class SetIxH(val value: Int): AsmInstruction()
@@ -70,6 +71,7 @@ class AsmParser {
             "JMP" to Jmp::class,
             "JPC" to Jpc::class,
             "JPZ" to Jpz::class,
+            "JPS" to Jps::class,
             "SETIXL" to SetIxL::class,
             "SETIXH" to SetIxH::class,
             "SETIX" to SetIx::class,

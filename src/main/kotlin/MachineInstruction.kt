@@ -99,6 +99,7 @@ sealed class MachineInstruction(val opcode: Int) {
     class JP(addr: Address) : TwoWord(0x60, addr)
     class JPC(addr: Address) : TwoWord(0x40, addr)
     class JPZ(addr: Address) : TwoWord(0x50, addr)
+    class JPS(addr: Address) : TwoWord(0x70, addr)
 
     abstract fun toBytes(): List<Byte>
     abstract fun getSize(): Int
