@@ -86,7 +86,7 @@ class Asm2Machine {
                 is AsmInstruction.Cmp -> listOf(MachineInstruction.CMP())
                 is AsmInstruction.Jmp -> listOf(MachineInstruction.JP(convAddress(instr.address)))
                 is AsmInstruction.Jpc -> listOf(MachineInstruction.JPC(convAddress(instr.address)))
-                is AsmInstruction.Jpn -> listOf(MachineInstruction.JPN(convAddress(instr.address)))
+                is AsmInstruction.Jpz -> listOf(MachineInstruction.JPZ(convAddress(instr.address)))
                 is AsmInstruction.SetIxL -> listOf(MachineInstruction.SETIXL(Address.Addr(instr.value.toUShort())))
                 is AsmInstruction.SetIxH -> listOf(MachineInstruction.SETIXH(Address.Addr(instr.value.toUShort())))
                 is AsmInstruction.SetIx -> listOf(
