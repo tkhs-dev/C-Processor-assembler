@@ -30,6 +30,13 @@ sealed class AsmInstruction {
         class Or(dest: Reg): Op(dest)
     }
 
+    sealed class Shift(val value: Int): AsmInstruction() {
+        class Sla(value: Int): Shift(value)
+        class Sra(value: Int): Shift(value)
+        class Sll(value: Int): Shift(value)
+        class Srl(value: Int): Shift(value)
+    }
+
     class Cmp: AsmInstruction()
 
     data class Jmp(val address: Address): AsmInstruction()
@@ -66,6 +73,10 @@ class AsmParser {
             "NOT" to Op.Not::class,
             "AND" to Op.And::class,
             "OR" to Op.Or::class,
+            "SLA" to Shift.Sla::class,
+            "SRA" to Shift.Sra::class,
+            "SLL" to Shift.Sll::class,
+            "SRL" to Shift.Srl::class,
             "CMP" to Cmp::class,
             "JMP" to Jmp::class,
             "JPC" to Jpc::class,

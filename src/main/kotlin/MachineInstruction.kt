@@ -95,6 +95,10 @@ sealed class MachineInstruction(val opcode: Int) {
     class LDIA(value: Byte) : OneWord(0xD8, value)
     class LDIB(value: Byte) : OneWord(0xD9, value)
     class STDI(value: Byte) : OneWord(0xF8, value)
+    class SLL(value: Byte) : OneWord(0x70, value)
+    class SRL(value: Byte) : OneWord(0x71, value)
+    class SLA(value: Byte) : OneWord(0x72, value)
+    class SRA(value: Byte) : OneWord(0x73, value)
 
     class JP(addr: Address) : TwoWord(0x60, addr)
     class JPC(addr: Address) : TwoWord(0x40, addr)

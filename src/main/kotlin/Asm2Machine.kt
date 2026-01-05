@@ -83,6 +83,11 @@ class Asm2Machine {
                     }
                 }
 
+                is AsmInstruction.Shift.Sla -> listOf(MachineInstruction.SLA(instr.value.toByte()))
+                is AsmInstruction.Shift.Sll -> listOf(MachineInstruction.SLL(instr.value.toByte()))
+                is AsmInstruction.Shift.Sra -> listOf(MachineInstruction.SRA(instr.value.toByte()))
+                is AsmInstruction.Shift.Srl -> listOf(MachineInstruction.SRL(instr.value.toByte()))
+
                 is AsmInstruction.Cmp -> listOf(MachineInstruction.CMP())
                 is AsmInstruction.Jmp -> listOf(MachineInstruction.JP(convAddress(instr.address)))
                 is AsmInstruction.Jpc -> listOf(MachineInstruction.JPC(convAddress(instr.address)))
