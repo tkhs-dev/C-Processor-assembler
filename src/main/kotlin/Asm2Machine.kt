@@ -57,6 +57,11 @@ class Asm2Machine {
                         AsmInstruction.Reg.B -> listOf(MachineInstruction.SUBB())
                     }
 
+                    is AsmInstruction.Op.Mul -> when (instr.dest) {
+                        AsmInstruction.Reg.A -> listOf(MachineInstruction.MULA())
+                        AsmInstruction.Reg.B -> listOf(MachineInstruction.MULB())
+                    }
+
                     is AsmInstruction.Op.Inc -> when (instr.dest) {
                         AsmInstruction.Reg.A -> listOf(MachineInstruction.INCA())
                         AsmInstruction.Reg.B -> listOf(MachineInstruction.INCB())
@@ -89,6 +94,12 @@ class Asm2Machine {
                 is AsmInstruction.Shift.Srl -> listOf(MachineInstruction.SRL(instr.value.toByte()))
 
                 is AsmInstruction.Cmp -> listOf(MachineInstruction.CMP())
+
+                is AsmInstruction.Mov -> when (instr.dest) {
+                    AsmInstruction.Reg.A -> listOf(MachineInstruction.MOVBA())
+                    AsmInstruction.Reg.B -> listOf(MachineInstruction.MOVAB())
+                }
+
                 is AsmInstruction.Jmp -> listOf(MachineInstruction.JP(convAddress(instr.address)))
                 is AsmInstruction.Jpc -> listOf(MachineInstruction.JPC(convAddress(instr.address)))
                 is AsmInstruction.Jpz -> listOf(MachineInstruction.JPZ(convAddress(instr.address)))

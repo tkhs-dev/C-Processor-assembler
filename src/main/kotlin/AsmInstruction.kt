@@ -23,6 +23,7 @@ sealed class AsmInstruction {
     sealed class Op(val dest: Reg): AsmInstruction() {
         class Add(dest: Reg): Op(dest)
         class Sub(dest: Reg): Op(dest)
+        class Mul(dest: Reg): Op(dest)
         class Inc(dest: Reg): Op(dest)
         class Dec(dest: Reg): Op(dest)
         class Not(dest: Reg): Op(dest)
@@ -38,6 +39,8 @@ sealed class AsmInstruction {
     }
 
     class Cmp: AsmInstruction()
+
+    data class Mov(val dest: Reg): AsmInstruction()
 
     data class Jmp(val address: Address): AsmInstruction()
     data class Jpc(val address: Address): AsmInstruction()
@@ -68,6 +71,7 @@ class AsmParser {
             "STI" to StoreI::class,
             "ADD" to Op.Add::class,
             "SUB" to Op.Sub::class,
+            "MUL" to Op.Mul::class,
             "INC" to Op.Inc::class,
             "DEC" to Op.Dec::class,
             "NOT" to Op.Not::class,
@@ -78,6 +82,7 @@ class AsmParser {
             "SLL" to Shift.Sll::class,
             "SRL" to Shift.Srl::class,
             "CMP" to Cmp::class,
+            "MOV" to Mov::class,
             "JMP" to Jmp::class,
             "JPC" to Jpc::class,
             "JPZ" to Jpz::class,
